@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPM Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .rpm-labels {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .rpm-labels span {
+            font-size: 14px;
+            color: #666;
+            margin: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #statusMessage {
+            margin-top: 20px;
+            font-weight: bold;
+            display: none;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>RPM Dashboard</h2>
+    <div class="rpm-labels">
+        <span>Daily RPM</span>
+        <span>Weekly RPM</span>
+        <span>Monthly RPM</span>
+        <span>90 day RPM</span>
+        <span>1 Year RPM</span>
+        <span>Project 1 RPM</span>
+        <span>Project 2 RPM</span>
+        <span>Project 3 RPM</span>
+    </div>
+
+    <form id="rpmForm">
+        <div class="form-group">
+            <label for="category">Chọn hạng mục:</label>
+            <select id="category" name="category" required>
+                <option value="Daily RPM">Daily RPM</option>
+                <option value="Weekly RPM">Weekly RPM</option>
+                <option value="Monthly RPM">Monthly RPM</option>
+                <option value="90 day RPM">90 day RPM</option>
+                <option value="1 Year RPM">1 Year RPM</option>
+                <option value="Project 1 RPM">Project 1 RPM</option>
+                <option value="Project 2 RPM">Project 2 RPM</option>
+                <option value="Project 3 RPM">Project 3 RPM</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="value">Nhập giá trị:</label>
+            <input type="text" id="value" name="value" placeholder="Nhập giá trị RPM" required>
+        </div>
+        <button type="submit">Lưu vào Google Sheets</button>
+    </form>
+    
+    <div id="statusMessage"></div>
+</div>
+
+<script>
+    const form = document.getElementById('rpmForm');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // **Bạn cần thay thế URL này bằng URL Google Apps Script bạn đã triển khai**
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbypLg6FCwXOC-kPhhdWFobxRhriUpjCLJc5yx_2Wy-s-N56KnsVmaawA6zig870Ak/exec';
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const category = document.getElementById('category').value;
+        const value = document.getElementById('value').value;
+        
+        statusMessage.textContent = 'Đang gửi dữ liệu...';
+        statusMessage.className = '';
+        statusMessage.style.display = 'block';
+
+        const data = { category: category, value: value };
+
+        // Tạo một iframe ẩn để gửi yêu cầu GET không bị chặn bởi CORS
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = webAppUrl + '?data=' + encodeURIComponent(JSON.stringify(data));
+        document.body.appendChild(iframe);
+
+        iframe.onload = () => {
+            statusMessage.textContent = '✅ Dữ liệu đã được lưu thành công!';
+            statusMessage.className = 'success';
+            form.reset();
+            document.body.removeChild(iframe);
+        };
+        
+        iframe.onerror = () => {
+            statusMessage.textContent = `❌ Lỗi: Không thể kết nối tới Google Apps Script. Vui lòng kiểm tra lại URL.`;
+            statusMessage.className = 'error';
+            document.body.removeChild(iframe);
+        };
+    });
+</script>
+
+</body>
+</html>
